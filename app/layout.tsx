@@ -1,21 +1,22 @@
-import "../../globals.css";
-import {Suspense} from "react";
-import Loading from "@/app/en/register/loading";
-import Header from "@/app/en/register/Header";
+import "./globals.css";
+import { Suspense } from "react";
+import { ATopLevelComponent, Provider } from "@/components/ToastProvider";
+import Loading from "@/app/loading";
+import { UserProvider } from "@/context/user.context";
 
-
-export default function RootLayout({children}: {
-    children: React.ReactNode;
-}) {
-    return (
-        <html>
-        <head/>
-        <body>
-        <Suspense fallback={<Loading/>}>
-           <Header/>
-            {children}
-        </Suspense>
-        </body>
-        </html>
-    );
+export default function RootLayout({ children }: any) {
+  return (
+    <html lang="en">
+      <body>
+        <UserProvider>
+          <Provider>
+            <ATopLevelComponent />
+            <Suspense fallback={<Loading />}>
+              <div>{children}</div>
+            </Suspense>
+          </Provider>
+        </UserProvider>
+      </body>
+    </html>
+  );
 }

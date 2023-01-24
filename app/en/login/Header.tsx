@@ -96,7 +96,9 @@ function Header() {
         {/* Mobile and small-screen devices (toggle Menu) */}
         <div
           id="MobileNavigation"
-          className={`${show ? "block" : "hidden"} sm:hidden mt-4 items-center justify-center absolute w-full `}
+          className={`${
+            show ? "block" : "hidden"
+          } sm:hidden mt-4 items-center justify-center absolute w-full `}
         >
           <div className="flex flex-row items-center justify-center bg-[rgb(40,48,56)] text-center space-x-10 ">
             <svg

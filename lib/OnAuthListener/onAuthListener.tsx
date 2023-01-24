@@ -1,13 +1,18 @@
 import { useEffect } from "react";
 import { onAuthStateChangedListener } from "@/lib/firebase";
-import { User } from "@firebase/auth";
 
-export const AuthListener = ({ setCurrentUser }: any) => {
+export const AuthListener = ({ setCurrentUser, setIsLoggedIn }: any) => {
   useEffect(() => {
-    onAuthStateChangedListener((user: User | null) => {
-      setCurrentUser(user);
+    const unsubscribe = onAuthStateChangedListener((user: any) => {
+      if (user) {
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+      } else {
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+      }
     });
-  }, [setCurrentUser]);
-
+    return () => unsubscribe();
+  }, []);
   return null;
 };
