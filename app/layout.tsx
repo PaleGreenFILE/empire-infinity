@@ -1,18 +1,21 @@
-import './globals.css'
+import "../../globals.css";
+import {Suspense} from "react";
+import Loading from "@/app/en/register/loading";
+import Header from "@/app/en/register/Header";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
+
+export default function RootLayout({children}: {
+    children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      {/*
-        <head /> will contain the components returned by the nearest parent
-        head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
-      */}
-      <head />
-      <body>{children}</body>
-    </html>
-  )
+    return (
+        <html>
+        <head/>
+        <body>
+        <Suspense fallback={<Loading/>}>
+           <Header/>
+            {children}
+        </Suspense>
+        </body>
+        </html>
+    );
 }
