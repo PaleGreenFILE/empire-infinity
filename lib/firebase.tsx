@@ -1,3 +1,4 @@
+"use client";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {
@@ -47,6 +48,7 @@ export async function CreateUserDocumentsFromAuth(
   userUid: string,
   data: any,
   notify: any,
+  router: any,
   additionalInformation = {}
 ) {
   const userDocRef = doc(db, "users", userUid);
@@ -64,16 +66,20 @@ export async function CreateUserDocumentsFromAuth(
       linkReferrer,
       uuid,
     } = data;
+    const address = "";
+    const displayName = data.firstName;
     const createdAt = new Date();
     const updatedAt = new Date();
     const level = 1;
     try {
       await setDoc(userDocRef, {
+        displayName,
         firstName,
         lastName,
         country,
         email,
         phone,
+        address,
         termsAccept,
         refId,
         refBy,
@@ -85,10 +91,10 @@ export async function CreateUserDocumentsFromAuth(
         ...additionalInformation,
       }).then(async () => {
         try {
-          if (refBy !== "") {
+          if (data.refBy !== "") {
             const MyRefferer = query(
               collection(db, "users"),
-              where("refBy", "==", refBy)
+              where("refBy", "==", data.refId)
             );
             const querySnapshot = await getDocs(MyRefferer);
             if (!querySnapshot.empty) {
@@ -96,24 +102,47 @@ export async function CreateUserDocumentsFromAuth(
                 console.log(doc.id, " => ", doc.data());
               });
             }
-          } else if (refBy === "") {
+            /*      const RefferalDocRef = doc(db, `users/${userUid}/affiliate`, userUid);
+            const RefferalSnapshot = await getDoc(RefferalDocRef);
+            if (!RefferalSnapshot.exists() && refBy !== "") {
+              await setDoc(RefferalDocRef, {
+                refBy,
+                createdAt,
+              });
+            }*/
             notify.showSuccessNotification(
-              `User ${data.firstName} are created successfully `
+              `Welcome ${data.firstName} your account are created successfully Please verify your email inbox!`
+            );
+            console.log(
+              `Welcome ${data.firstName} your account are created successfully Please verify your email inbox!`
             );
             console.log("Document successfully written!");
-            console.log("refBy", refBy);
+            console.log(`Email sent to ${data.email}`);
+            //console.log("refBy", refBy);
+            setTimeout(() => {
+              router.push("/en/login");
+            }, 4000);
+          } else if (data.refBy === "") {
+            notify.showSuccessNotification(
+              `Welcome ${data.firstName} your account are created successfully Please verify your email inbox!`
+            );
+            console.log(
+              `Welcome ${data.firstName} your account are created successfully Please verify your email inbox!`
+            );
+            console.log("Document successfully written!");
+            console.log(`Email sent to ${data.email}`);
+            //console.log("refBy", refBy);
+            setTimeout(() => {
+              router.push("/en/login");
+            }, 4000);
+            console.log("No referrer");
           }
-        } catch (err) {
+        } catch (err: any) {
+          notify.showErrorNotification(
+            `Error sending email verification ${err.message}`
+          );
           console.log(err);
         }
-        /*      const RefferalDocRef = doc(db, `users/${userUid}/affiliate`, userUid);
-          const RefferalSnapshot = await getDoc(RefferalDocRef);
-          if (!RefferalSnapshot.exists() && refBy !== "") {
-            await setDoc(RefferalDocRef, {
-              refBy,
-              createdAt,
-            });
-          }*/
       });
     } catch (err: any) {
       console.log(`error creating the user ${err.message}`);
@@ -136,18 +165,18 @@ export async function logIn(
     await signInWithEmailAndPassword(auth, email, password);
     if (auth.currentUser?.emailVerified === true) {
       notify.showSuccessWithoutTitleNotification(
-        `Welcome again ${auth.currentUser.email}!`
+        `Welcome ${auth.currentUser.email}!`
       );
-      router.push("/en/dashboard");
+      setTimeout(() => {
+        router.push("/en/dashboard");
+      }, 2500);
       console.log("Connexion Autorisée");
-      console.log("Connexion Autorisée", auth.currentUser);
     } else {
       notify.showWarningNotification(
         `Connection not authorized ! Please verify your email !`
       );
       console.log("Connexion non Autorisée ! Veuillez vérifier votre email !");
     }
-    console.log(auth);
   } catch (err: any) {
     console.log(err.message);
     if (err.code === "auth/claims-too-large") {
@@ -198,55 +227,41 @@ export async function CreateUser(
     return;
   }
   try {
-    await createUserWithEmailAndPassword(auth, email, password).then(
-      async (userCredential: any) => {
-        if (userCredential.user) {
-          console.log(
-            `Welcome ${data.firstName} your account are created successfully Please verify your email inbox!`
-          );
-          try {
-            setTimeout(async () => {
-              try {
-                await sendEmailVerification(userCredential?.user);
-                console.log(`Email sent to ${data.email}`);
-              } catch (err) {
-                console.log("error sending email verification", err);
-              }
-            }, 4000);
-            const userUid = userCredential.user.uid;
-            await CreateUserDocumentsFromAuth(userUid, data, notify);
-            router.push("/en/login");
-          } catch (err) {
-            console.log("Error sending email verification", err);
-            notify.showErrorNotification(
-              `Error sending email verification to ${data.email}`
-            );
-          }
-        }
-      }
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
     );
+    if (userCredential.user) {
+      try {
+        await sendEmailVerification(userCredential.user);
+        const userUid = userCredential.user.uid;
+        await CreateUserDocumentsFromAuth(userUid, data, notify, router);
+      } catch (err: any) {
+        console.log("Error sending email verification", err);
+        notify.showErrorNotification(`${err.message}`);
+      }
+    }
   } catch (err: any) {
     if (err.code === "auth/claims-too-large") {
-      notify.showErrorNotification(`TOO MANY ATTEMPTS TRY LATER`);
+      notify.showErrorNotification("TOO MANY ATTEMPTS TRY LATER");
       console.log("TOO MANY ATTEMPTS TRY LATER !");
-    }
-    if (err.code === "auth/email-already-in-use") {
+    } else if (err.code === "auth/email-already-in-use") {
       notify.showErrorNotification(`User ${data.email} already in use`);
       console.log("Email already in use !");
-    }
-    if (err.code === "auth/weak-password") {
+    } else if (err.code === "auth/weak-password") {
       notify.showErrorNotification(
         "Password should be at least 6 characters !"
       );
       console.log("Password should be at least 6 characters !");
-    }
-    if (err.code === "auth/internal-error") {
+    } else if (err.code === "auth/internal-error") {
       notify.showErrorNotification("Internal error !");
       console.log("Internal error !");
-    }
-    if (err.code === "auth/invalid-email") {
+    } else if (err.code === "auth/invalid-email") {
       notify.showErrorNotification("Invalid email !");
       console.log("Invalid email !");
+    } else {
+      console.log(err);
     }
   }
 }

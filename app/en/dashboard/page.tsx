@@ -1,5 +1,3 @@
-// noinspection Annotator,HtmlUnknownTarget,JSUnusedGlobalSymbols
-
 "use client";
 import Link from "next/link";
 import { logOut } from "@/lib/firebase";
@@ -23,7 +21,7 @@ function DashBoard() {
     <div className="flex max-w-7xl mx-auto p-10 items-center justify-center">
       <div className="flex flex-col items-center justify-center"></div>
       <div className="p-10">
-        <Link href="en/dashboard/refferal">
+        <Link href={"en/dashboard/refferal"}>
           <button className="bg-[rgb(3,161,126)] text-white p-2 cursor-pointer h-10 mt-12 rounded-lg shadow-black shadow-lg">
             Go to Referral Page
           </button>

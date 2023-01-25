@@ -14,21 +14,7 @@ import "react-phone-input-2/lib/bootstrap.css";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGenerateData } from "@/components/GenerateLink";
 import { useNotification } from "@/components/Toast";
-
-interface IFormInput {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  password: string;
-  confirmPassword: string;
-  country: string;
-  termsAccept: boolean;
-  refId: Number;
-  refBy: string;
-  uuid: string;
-  linkReferrer: string;
-}
+import { User } from "@/types";
 
 const initialValues = {
   firstName: "",
@@ -39,8 +25,8 @@ const initialValues = {
   password: "",
   confirmPassword: "",
   termsAccept: false,
-  refId: "",
-  refBy: "",
+  refId: 0,
+  refBy: 0,
   uuid: "",
   linkReferrer: "",
 };
@@ -51,10 +37,10 @@ export default function RegisterPageComponent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const searchParams = useSearchParams();
   const affid = searchParams.get("affid");
+  const refBy = affid ? Number(affid) : 0;
   const params = useGenerateData();
   const notify = useNotification();
   const router = useRouter();
-
   const {
     register,
     setValue,
@@ -62,7 +48,7 @@ export default function RegisterPageComponent() {
     watch,
     setError,
     formState: { errors },
-  } = useForm<IFormInput>({ defaultValues: initialValues });
+  } = useForm<User>({ defaultValues: initialValues });
   const firstName = watch("firstName", "");
   const lastName = watch("lastName", "");
   const email = watch("email", "");
@@ -86,7 +72,7 @@ export default function RegisterPageComponent() {
     {
       register("refBy");
     }
-    setValue("refBy", affid || "");
+    setValue("refBy", refBy);
     {
       register("phone");
     }
@@ -105,14 +91,20 @@ export default function RegisterPageComponent() {
     setValue("linkReferrer", params.link);
   };
 
-  async function onSubmit(data: any, event: any) {
+  async function onSubmit(data: User, event: any) {
     event.preventDefault();
     if (password !== confirmPassword) {
       alert("Please your password do not match!");
       return;
     }
     try {
-      await CreateUser(data.email, data.password, data, notify, router);
+      await CreateUser(
+        data.email,
+        data.password as string,
+        data,
+        notify,
+        router
+      );
     } catch (err) {
       console.log("user creation encountered an error", err);
     }

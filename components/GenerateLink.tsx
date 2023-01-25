@@ -1,3 +1,4 @@
+"use client";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState } from "react";
 
@@ -24,7 +25,7 @@ function generateAffiliateLink(userId: number) {
   //Générer un token unique
   const token = generateUniqueToken();
   //Créer lien d'affiliation unique
-  return `${affiliateService}?token=${token}&affid=${userId}`;
+  return `${affiliateService}?token=${token}&affid=` + userId;
 }
 export function useGenerateData() {
   const [data, setData] = useState({

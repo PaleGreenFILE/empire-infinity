@@ -1,16 +1,19 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
-import { UserContext } from "@/context/user.context";
+import { useContext } from "react";
 import { useRouter } from "next/navigation";
+import { UserContext } from "@/context/user.context";
+import Cookies from "js-cookie";
 
 export function ProtectedRoute({ children }: any) {
-  const { isLoggedIn } = useContext(UserContext);
   const router = useRouter();
+  const { isLoggedIn, currentUser } = useContext(UserContext);
+  const isLoggedInCookie =
+    Cookies.get("cookieAuth") == currentUser?.email || false;
+  const accessTokenValid = Cookies.get("accessToken") || false;
 
-  if (!isLoggedIn) {
-    router.push("/");
-    return;
-  } else if (isLoggedIn) {
+  if (!isLoggedIn || !isLoggedInCookie || !accessTokenValid) {
+    router.replace("/");
+  } else {
     return children;
   }
 }

@@ -34,7 +34,7 @@ setUpNotifications({
   defaultProps: {
     position: "top-right",
     dismissible: false,
-    dismissAfter: 5000,
+    dismissAfter: 3000,
   },
   generateId: () => new Date().getTime().toString(),
 });

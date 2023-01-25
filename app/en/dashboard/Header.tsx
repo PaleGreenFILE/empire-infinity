@@ -9,7 +9,7 @@ function Header() {
       <nav className="2xl:container 2xl:mx-auto sm:py-6 sm:px-7 py-5">
         {/* For large and Medium-sized Screen */}
         <div className="flex justify-between md:mx-32 mx-5 ">
-          <Link href="/">
+          <Link href={"/"}>
             <div className=" flex space-x-3 items-center">
               <svg
                 width={34}
